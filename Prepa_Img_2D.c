@@ -219,10 +219,11 @@ void Damier(image * img) {
 
 
 /****************************************************************************************
-* Genere une image en damier noir et blanc
-*   img     : structure image
+ * Genere une image en damier noir et blanc
+ *      img     : structure image
+ *      SIZE    : taille des pavés en pixels (hauteur et largeur)
 ****************************************************************************************/
-void Damier_size(image * img) {
+void Damier_size(image * img, int size) {
 
     int x, y, col;
 
