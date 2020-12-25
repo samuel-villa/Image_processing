@@ -35,8 +35,12 @@ void Tst_System_SAM(void) {
     img = Lire_Image("tiger", "");
     Afficher_Header(img);
 
-    Damier_size(img);
+    Damier_size(img, 50);
     Ecrire_Image(img, "_5");
+
+//    img = Creer_Image("tiger", 500, 500, CYAN);
+//    Afficher_Header(img);
+//    Ecrire_Image(img, "_010");
 
     Free_Image(img);
 }
@@ -220,23 +224,30 @@ void Damier(image * img) {
 
 /****************************************************************************************
  * Genere une image en damier noir et blanc
- *      img     : structure image
- *      SIZE    : taille des pavés en pixels (hauteur et largeur)
+ *      img : structure image
+ *      size: taille des pavés en pixels (hauteur et largeur)
+ *            size DOIT etre un diviseur de hauteur et largeur
 ****************************************************************************************/
 void Damier_size(image * img, int size) {
 
-    int x, y, col;
+    int x, y, col = NOIR, ct_h=0, ct_l=0;
 
     for(y=0; y<img->header.hauteur; y++) {
 
-        col = y % 10 ? NOIR : BLANC;
+        if (ct_h == size) {
+            ct_h = 0;
+            col = 1 - col;
+        }
+        ct_h++;
 
         for (x=0; x<img->header.largeur; x++) {
 
-            Set_Pixel(img, x, y, Get_Col(col));
-            if (x % 10 == 0) {
-                col = 1 - col;      // switch
+            if (ct_l == size) {
+                ct_l = 0;
+                col = 1 - col;
             }
+            Set_Pixel(img, x, y, Get_Col(col));
+            ct_l++;
         }
     }
 }
