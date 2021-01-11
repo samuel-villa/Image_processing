@@ -12,6 +12,7 @@
 
 void Filtrer_Noir_Blanc(image * img);
 void Damier(image * img);
+void Damier_size(image * img, int size);        // create chess board; cases of given size
 
 void Tst_System_01(void);
 void Tst_System_02(void);

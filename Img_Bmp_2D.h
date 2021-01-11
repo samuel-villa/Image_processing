@@ -139,7 +139,5 @@ void Initialiser_Image(image * img, pixel * col);
 pixel * Get_Pixel(image * img, int x, int y);
 void Set_Pixel(image * img, int x, int y, pixel * col);
 
-void Damier_size(image * img, int size);
-
 
 #endif
