@@ -121,23 +121,25 @@ typedef struct Image {
 /****************************************************************************************
 * Prototypes Systeme : Gestion des image sur disque et allocation dynamique memoire
 ****************************************************************************************/
-image * Lire_Image(char * nom_bas, char * nom_tag);
-image * Creer_Image(char * nom_bas, uint largeur, uint hauteur, int col);
-void Ecrire_Image(image * img, char * nom_tag);
-void Nom_Image(char * nom, char * nom_base, char * nom_tag);
+image * Lire_Image(char * nom_bas, char * nom_tag);                         // Lire un fichier BMP 24bits original en memoire
+image * Creer_Image(char * nom_bas, uint largeur, uint hauteur, int col);   // Creer une image vierge uniformement coloree en memoire
+void Ecrire_Image(image * img, char * nom_tag);                             // Ecrire l'image en memoire sur disque (en passant par un buffer)
+void Nom_Image(char * nom, char * nom_base, char * nom_tag);                // Composition du nom de fichier complet
 
-pixel ** Malloc_Pic(uint hauteur, uint largeur);
-void Free_Pic(pixel ** t, uint hauteur, uint largeur);
+pixel ** Malloc_Pic(uint hauteur, uint largeur);                            // Allocation dynamique d'une image sous forme d'un tableau de pixels a 2 dimensions
+void Free_Pic(pixel ** t, uint hauteur, uint largeur);                      // Desallocation d'une matrice image
 
-void Free_Image(image * img);
-void Afficher_Header(image * img);
+void Free_Image(image * img);                                               // Desallocation d'une image
+void Afficher_Header(image * img);                                          // Afficher les donnees du fichier BMP 24bits original
 
-pixel * Get_Col(int col);
+pixel * Get_Col(int col);                                                   // Donner une couleur de base sur 8 niveaux possibles
 
-void Initialiser_Image(image * img, pixel * col);
+void Initialiser_Image(image * img, pixel * col);                           // Initialiser l'image a une valeur constante
 
-pixel * Get_Pixel(image * img, int x, int y);
-void Set_Pixel(image * img, int x, int y, pixel * col);
+pixel * Get_Pixel(image * img, int x, int y);                               // Get pixel value
+void Set_Pixel(image * img, int x, int y, pixel * col);                     // Set pixel value
+
+image * Lire_resized_Image(char * nom_bas, char * nom_tag);
 
 
 #endif

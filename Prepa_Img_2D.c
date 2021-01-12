@@ -32,17 +32,24 @@ void Tst_System_SAM(void) {
 
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
-    img = Lire_Image("tiger", "");
-    Afficher_Header(img);
+    img = Lire_Image("hendrix", "");
+    //Afficher_Header(img);
 
-    Damier_size(img, 50);
-    Ecrire_Image(img, "_5");
+    paving(img, 50);
+    Ecrire_Image(img, "_pav");
+
+    //damier_size(img, 50);
+    //Ecrire_Image(img, "_5");
+
+    //Filtrer_Noir_Blanc(img);
+    //Ecrire_Image(img, "_nb");
 
 //    img = Creer_Image("tiger", 500, 500, CYAN);
 //    Afficher_Header(img);
 //    Ecrire_Image(img, "_010");
 
     Free_Image(img);
+
 }
 
 /****************************************************************************************
@@ -228,7 +235,7 @@ void Damier(image * img) {
  *      size: taille des pavés en pixels (hauteur et largeur)
  *            size DOIT etre un diviseur de hauteur et largeur
 ****************************************************************************************/
-void Damier_size(image * img, int size) {
+void damier_size(image * img, int size) {
 
     int x, y, col = NOIR, ct_h=0, ct_l=0;
 
@@ -248,6 +255,105 @@ void Damier_size(image * img, int size) {
             }
             Set_Pixel(img, x, y, Get_Col(col));
             ct_l++;
+        }
+    }
+}
+
+
+
+/****************************************************************************************
+ * Agrandi une image en correspondance au facteur donne
+ *      img   : structure image
+ *      factor: rapport de taille (facteur 2 => hauteur x2 et largeur x2)
+****************************************************************************************/
+image * resize_init(image * img, int factor) {
+
+    image *rsz = NULL;
+    int bufsize;
+
+    /* Allocation de la structure image */
+    rsz = (image *)malloc(sizeof(image));
+    if (rsz == NULL) {
+        printf("problem: Impossible d'initialiser avec malloc\n" );
+        exit(EXIT_FAILURE);
+    }
+
+    /* Initialisation des autres caracteristiques de l'image */
+    rsz->header.hauteur = img->header.hauteur * factor;
+    rsz->header.largeur = img->header.largeur * factor;
+    rsz->nb_pix = rsz->header.hauteur * rsz->header.largeur;
+    strncpy(rsz->nom_base, "hendrixt", FIC_NM);
+
+    /* Allocation de l'image */
+    rsz->pic = Malloc_Pic(rsz->header.hauteur, rsz->header.largeur);
+
+    /* Lecture de l'image dans le tableau de pixel */
+    bufsize = (3 * rsz->header.largeur + rsz->header.hauteur%4) * rsz->header.hauteur;
+
+    /* Resize header to 54 char */
+    rsz->header.offset = HEADER_SIZE;
+    rsz->header.lg_head = HEADER_SIZE - 14;
+    rsz->header.taille = rsz->header.offset + bufsize;
+
+    int x, y, col = 3;
+    pixel *p;
+
+    for(y=0; y<img->header.hauteur; y++) {
+
+        for (x=0; x<img->header.largeur; x++) {
+
+            p = Get_Pixel(img, x, y);
+            Set_Pixel(img, x, y, Get_Col(col));
+        }
+    }
+
+    return rsz;
+}
+
+
+
+
+/****************************************************************************************
+ * Pavage d'image
+ *      in    : structure image INPUT
+ *      out   : structure image OUTPUT
+ *      factor: taille des paves (haut. et larg.)
+****************************************************************************************/
+void paving(image * in, int factor) {
+
+    // FIXME the '0' of every pave is not taken in account so it creates a 'grid'
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB;
+    int div = factor*factor;
+    pixel *pix;
+
+    for (y=0; y<in->header.hauteur; y+=factor) {
+        for(x=0; x<in->header.hauteur; x+=factor) {
+
+            for (yi=y; (yi % factor) < factor-1; yi++) {
+                for (xi=x; (xi % factor) < factor-1; xi++) {
+
+                    pix = Get_Pixel(in, xi, yi);
+                    sumB += pix->B;
+                    sumR += pix->R;
+                    sumG += pix->G;
+                }
+            }
+            avgB = sumB/div;
+            avgR = sumR/div;
+            avgG = sumG/div;
+
+            // set average color on output image
+            for (yi=y; (yi % factor) < factor-1; yi++) {
+                for (xi=x; (xi % factor) < factor-1; xi++) {
+
+                    pix = Get_Pixel(in, xi, yi);
+                    pix->B = avgB;
+                    pix->G = avgG;
+                    pix->R = avgR;
+                    Set_Pixel(in, xi, yi, pix);
+                }
+            }
+            sumG = 0; sumR = 0; sumB = 0;
         }
     }
 }
