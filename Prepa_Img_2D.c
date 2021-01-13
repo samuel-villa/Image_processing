@@ -35,8 +35,17 @@ void Tst_System_SAM(void) {
     img = Lire_Image("hendrix", "");
     //Afficher_Header(img);
 
-    paving(img, 50);
-    Ecrire_Image(img, "_pav");
+    simple_paving(img, 5);
+    Ecrire_Image(img, "_pav1");
+
+    simple_paving(img, 10);
+    Ecrire_Image(img, "_pav2");
+
+    simple_paving(img, 20);
+    Ecrire_Image(img, "_pav3");
+
+    simple_paving(img, 50);
+    Ecrire_Image(img, "_pav4");
 
     //damier_size(img, 50);
     //Ecrire_Image(img, "_5");
@@ -315,24 +324,21 @@ image * resize_init(image * img, int factor) {
 
 /****************************************************************************************
  * Pavage d'image
- *      in    : structure image INPUT
- *      out   : structure image OUTPUT
+ *      img   : structure image
  *      factor: taille des paves (haut. et larg.)
 ****************************************************************************************/
-void paving(image * in, int factor) {
+void simple_paving(image * img, int factor) {
 
-    // FIXME the '0' of every pave is not taken in account so it creates a 'grid'
-    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB;
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
     int div = factor*factor;
     pixel *pix;
 
-    for (y=0; y<in->header.hauteur; y+=factor) {
-        for(x=0; x<in->header.hauteur; x+=factor) {
+    for (y=0; y<img->header.hauteur; y+=factor) {
+        for(x=0; x<img->header.largeur; x+=factor) {
 
-            for (yi=y; (yi % factor) < factor-1; yi++) {
-                for (xi=x; (xi % factor) < factor-1; xi++) {
-
-                    pix = Get_Pixel(in, xi, yi);
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
                     sumB += pix->B;
                     sumR += pix->R;
                     sumG += pix->G;
@@ -343,17 +349,19 @@ void paving(image * in, int factor) {
             avgG = sumG/div;
 
             // set average color on output image
-            for (yi=y; (yi % factor) < factor-1; yi++) {
-                for (xi=x; (xi % factor) < factor-1; xi++) {
-
-                    pix = Get_Pixel(in, xi, yi);
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
                     pix->B = avgB;
                     pix->G = avgG;
                     pix->R = avgR;
-                    Set_Pixel(in, xi, yi, pix);
+                    Set_Pixel(img, xi, yi, pix);
                 }
             }
             sumG = 0; sumR = 0; sumB = 0;
+            stepc += factor;
         }
+        stepl += factor;
+        stepc = factor;
     }
 }
