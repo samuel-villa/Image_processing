@@ -271,58 +271,6 @@ void damier_size(image * img, int size) {
 
 
 /****************************************************************************************
- * Agrandi une image en correspondance au facteur donne
- *      img   : structure image
- *      factor: rapport de taille (facteur 2 => hauteur x2 et largeur x2)
-****************************************************************************************/
-image * resize_init(image * img, int factor) {
-
-    image *rsz = NULL;
-    int bufsize;
-
-    /* Allocation de la structure image */
-    rsz = (image *)malloc(sizeof(image));
-    if (rsz == NULL) {
-        printf("problem: Impossible d'initialiser avec malloc\n" );
-        exit(EXIT_FAILURE);
-    }
-
-    /* Initialisation des autres caracteristiques de l'image */
-    rsz->header.hauteur = img->header.hauteur * factor;
-    rsz->header.largeur = img->header.largeur * factor;
-    rsz->nb_pix = rsz->header.hauteur * rsz->header.largeur;
-    strncpy(rsz->nom_base, "hendrixt", FIC_NM);
-
-    /* Allocation de l'image */
-    rsz->pic = Malloc_Pic(rsz->header.hauteur, rsz->header.largeur);
-
-    /* Lecture de l'image dans le tableau de pixel */
-    bufsize = (3 * rsz->header.largeur + rsz->header.hauteur%4) * rsz->header.hauteur;
-
-    /* Resize header to 54 char */
-    rsz->header.offset = HEADER_SIZE;
-    rsz->header.lg_head = HEADER_SIZE - 14;
-    rsz->header.taille = rsz->header.offset + bufsize;
-
-    int x, y, col = 3;
-    pixel *p;
-
-    for(y=0; y<img->header.hauteur; y++) {
-
-        for (x=0; x<img->header.largeur; x++) {
-
-            p = Get_Pixel(img, x, y);
-            Set_Pixel(img, x, y, Get_Col(col));
-        }
-    }
-
-    return rsz;
-}
-
-
-
-
-/****************************************************************************************
  * Pavage d'image
  *      img   : structure image
  *      factor: taille des paves (haut. et larg.)
