@@ -29,23 +29,38 @@ int main(void) {
 void test_paving(void) {
 
     image *img = NULL;
+    image *rsz = NULL;
 
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
     img = Lire_Image("hendrix", "");
     //Afficher_Header(img);
+    rsz = Lire_Image("hendrix", "");
+    resize_img(rsz, 10);
+    mosaic(img, rsz, 10);
+    Ecrire_Image(img, "_mos1");
 
-    simple_paving(img, 5);
-    Ecrire_Image(img, "_pav1");
+    /// resize test
+//    resize_img(img, 100);
+//    Ecrire_Image(img, "_rsz1");
+//    resize_img(img, 50);
+//    Ecrire_Image(img, "_rsz2");
+//    resize_img(img, 20);
+//    Ecrire_Image(img, "_rsz3");
+//    resize_img(img, 10);
+//    Ecrire_Image(img, "_rsz4");
+//    resize_img(img, 5);
+//    Ecrire_Image(img, "_rsz5");
 
-    simple_paving(img, 10);
-    Ecrire_Image(img, "_pav2");
-
-    simple_paving(img, 20);
-    Ecrire_Image(img, "_pav3");
-
-    simple_paving(img, 50);
-    Ecrire_Image(img, "_pav4");
+    /// paving test
+//    simple_paving(img, 5);
+//    Ecrire_Image(img, "_pav1");
+//    simple_paving(img, 10);
+//    Ecrire_Image(img, "_pav2");
+//    simple_paving(img, 20);
+//    Ecrire_Image(img, "_pav3");
+//    simple_paving(img, 50);
+//    Ecrire_Image(img, "_pav4");
 
     //damier_size(img, 50);
     //Ecrire_Image(img, "_5");
@@ -312,4 +327,100 @@ void simple_paving(image * img, int factor) {
         stepl += factor;
         stepc = factor;
     }
+}
+
+
+
+/****************************************************************************************
+ * Redimensionnement d'image (entier, donc le facteur DOIT etre un diviseur de la taille max)
+ *      img   : structure image
+ *      factor: facteur d'echelle de redimensionnement
+****************************************************************************************/
+void resize_img(image * img, int factor) {
+
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
+    int div = factor*factor;
+    pixel *pix;
+
+    for (y=0; y<img->header.hauteur; y+=factor) {
+        for(x=0; x<img->header.largeur; x+=factor) {
+
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
+                    sumB += pix->B;
+                    sumR += pix->R;
+                    sumG += pix->G;
+                }
+            }
+            avgB = sumB/div;
+            avgR = sumR/div;
+            avgG = sumG/div;
+
+            // set average color on a block of size
+            for (yi=y/factor; yi < stepl/factor; yi++) {
+                for (xi=x/factor; xi < stepc/factor; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
+                    pix->B = avgB;
+                    pix->G = avgG;
+                    pix->R = avgR;
+                    Set_Pixel(img, xi, yi, pix);
+                }
+            }
+            sumG = 0; sumR = 0; sumB = 0;
+            stepc += factor;
+        }
+        stepl += factor;
+        stepc = factor;
+    }
+    // update image header
+    img->header.hauteur = img->header.hauteur/factor;
+    img->header.largeur = img->header.largeur/factor;
+}
+
+
+
+/****************************************************************************************
+ * mosaique d'images retrecies composant une image de grande taille
+ *      img   : structure image
+ *      factor: taille des paves (haut. et larg.)
+****************************************************************************************/
+void mosaic(image * img, image * rsz, int factor) {
+
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
+    int div = factor*factor;
+    pixel *pix;
+
+    for (y=0; y<img->header.hauteur; y+=factor) {
+        for(x=0; x<img->header.largeur; x+=factor) {
+
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
+                    sumB += pix->B;
+                    sumR += pix->R;
+                    sumG += pix->G;
+                }
+            }
+            avgB = sumB/div;
+            avgR = sumR/div;
+            avgG = sumG/div;
+
+            // set average color on output image
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(rsz, xi, yi);
+                    //pix->B = avgB;
+                    //pix->G = avgG;
+                    //pix->R = avgR;
+                    Set_Pixel(img, xi, yi, pix);
+                }
+            }
+            sumG = 0; sumR = 0; sumB = 0;
+            stepc += factor;
+        }
+        stepl += factor;
+        stepc = factor;
+    }
+    Free_Image(rsz);
 }
