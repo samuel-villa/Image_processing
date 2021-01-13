@@ -20,7 +20,7 @@ void Tst_System_01(void);
 void Tst_System_02(void);
 void Tst_System_03(void);
 void Tst_System_04(void);
-void Tst_System_SAM(void);
+void test_paving(void);
 
 
 #endif

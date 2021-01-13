@@ -18,7 +18,7 @@ int main(void) {
  //   Tst_System_02();                // monochromes handling size
  //   Tst_System_03();                // monochromes + damiers handling size
 //    Tst_System_04();                // copy ?
-    Tst_System_SAM();
+    test_paving();
 
     return 0;
 }
@@ -26,7 +26,7 @@ int main(void) {
 /****************************************************************************************
 * Test Sam
 ****************************************************************************************/
-void Tst_System_SAM(void) {
+void test_paving(void) {
 
     image *img = NULL;
 
