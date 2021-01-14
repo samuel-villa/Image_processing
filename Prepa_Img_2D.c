@@ -1,9 +1,9 @@
 /****************************************************************************************
-* Generation d'images .bmp 24 bits
+* .bmp 24 bits Image Generation
 *
-* Test des fonctions systemes
+* Testing system functions
 *
-* Programmation procedurale 2019 - E.Bosly - Version Demo
+* Programmation procedurale 2021 - Samuel CIULLA - Version 0
 ****************************************************************************************/
 #include "Prepa_Img_2D.h"
 
@@ -12,13 +12,14 @@
 ****************************************************************************************/
 int main(void) {
 
-    printf("\nTest image bitmap : matrice 2D\n\n");
+    printf("\nSamuel CIULLA");
+    printf("\nTest image bitmap: matrice 2D\n\n");
 
  //   Tst_System_01();                // copy + copy_bw + monochromes + damier
  //   Tst_System_02();                // monochromes handling size
  //   Tst_System_03();                // monochromes + damiers handling size
 //    Tst_System_04();                // copy ?
-    test_paving();
+    test_func();
 
     return 0;
 }
@@ -26,55 +27,63 @@ int main(void) {
 /****************************************************************************************
 * Test Sam
 ****************************************************************************************/
-void test_paving(void) {
+void test_func(void) {
 
     image *img = NULL;
-    image *rsz = NULL;
 
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
+    //img = Lire_Image("beethoven", "");
+    //Afficher_Header(img);
+
+    /// mosaic test
     img = Lire_Image("hendrix", "");
-    Afficher_Header(img);
-    rsz = Lire_Image("hendrix", "");
-
-    resize_img(rsz, 10);
-    Afficher_Header(rsz);
-    //Ecrire_Image(rsz, "_rsz1");
-
-    mosaic(img, rsz, 10);
+    mosaic(img, "hendrix", 5);                  // big hendrix - little hendrix
     Ecrire_Image(img, "_mos1");
+    img = Lire_Image("hendrix", "");
+    mosaic(img, "beethoven", 10);               // big hendrix - little beethoven
+    Ecrire_Image(img, "_mos2");
+    img = Lire_Image("hendrix", "");
+    mosaic(img, "hendrix", 20);                 // big hendrix - little hendrix
+    Ecrire_Image(img, "_mos3");
+    img = Lire_Image("beethoven", "");
+    mosaic(img, "beethoven", 10);               // big beethoven - little beethoven
+    Ecrire_Image(img, "_mos4");
+    img = Lire_Image("beethoven", "");
+    mosaic(img, "hendrix", 25);                 // big beethoven - little hendrix
+    Ecrire_Image(img, "_mos5");
+    img = Lire_Image("beethoven", "");
+    mosaic(img, "beethoven", 50);               // big beethoven - little beethoven
+    Ecrire_Image(img, "_mos6");                      // OK
 
     /// resize test
 //    resize_img(img, 100);
 //    Ecrire_Image(img, "_rsz1");
+//    img = Lire_Image("hendrix", "");
 //    resize_img(img, 50);
 //    Ecrire_Image(img, "_rsz2");
+//    img = Lire_Image("hendrix", "");
 //    resize_img(img, 20);
 //    Ecrire_Image(img, "_rsz3");
+//    img = Lire_Image("hendrix", "");
 //    resize_img(img, 10);
 //    Ecrire_Image(img, "_rsz4");
+//    img = Lire_Image("hendrix", "");
 //    resize_img(img, 5);
-//    Ecrire_Image(img, "_rsz5");
+//    Ecrire_Image(img, "_rsz5");                   // OK
 
     /// paving test
 //    simple_paving(img, 5);
 //    Ecrire_Image(img, "_pav1");
+//    img = Lire_Image("hendrix", "");
 //    simple_paving(img, 10);
 //    Ecrire_Image(img, "_pav2");
+//    img = Lire_Image("hendrix", "");
 //    simple_paving(img, 20);
 //    Ecrire_Image(img, "_pav3");
+//    img = Lire_Image("hendrix", "");
 //    simple_paving(img, 50);
-//    Ecrire_Image(img, "_pav4");
-
-    //damier_size(img, 50);
-    //Ecrire_Image(img, "_5");
-
-    //Filtrer_Noir_Blanc(img);
-    //Ecrire_Image(img, "_nb");
-
-//    img = Creer_Image("tiger", 500, 500, CYAN);
-//    Afficher_Header(img);
-//    Ecrire_Image(img, "_010");
+//    Ecrire_Image(img, "_pav4");                   // OK
 
     Free_Image(img);
 
@@ -257,42 +266,15 @@ void Damier(image * img) {
 }
 
 
-/****************************************************************************************
- * Genere une image en damier noir et blanc
- *      img : structure image
- *      size: taille des pavés en pixels (hauteur et largeur)
- *            size DOIT etre un diviseur de hauteur et largeur
-****************************************************************************************/
-void damier_size(image * img, int size) {
-
-    int x, y, col = NOIR, ct_h=0, ct_l=0;
-
-    for(y=0; y<img->header.hauteur; y++) {
-
-        if (ct_h == size) {
-            ct_h = 0;
-            col = 1 - col;
-        }
-        ct_h++;
-
-        for (x=0; x<img->header.largeur; x++) {
-
-            if (ct_l == size) {
-                ct_l = 0;
-                col = 1 - col;
-            }
-            Set_Pixel(img, x, y, Get_Col(col));
-            ct_l++;
-        }
-    }
-}
-
-
 
 /****************************************************************************************
- * Pavage d'image
- *      img   : structure image
- *      factor: taille des paves (haut. et larg.)
+ * Image paving
+ * This function has been implemented in integer type, meaning the 'factor' parameter
+ * MUST match with the image size, ex:
+ * if size = 500, factor = 10: 500/10=50        => OK
+ * if size = 500, factor = 15: 500/15=33,333... => NOT OK
+ *      img   : image struct
+ *      factor: size of pave pieces
 ****************************************************************************************/
 void simple_paving(image * img, int factor) {
 
@@ -303,7 +285,7 @@ void simple_paving(image * img, int factor) {
     for (y=0; y<img->header.hauteur; y+=factor) {
         for(x=0; x<img->header.largeur; x+=factor) {
 
-            for (yi=y; yi < stepl; yi++) {
+            for (yi=y; yi < stepl; yi++) {                  // get average color on input image bloc by bloc
                 for (xi=x; xi < stepc; xi++) {
                     pix = Get_Pixel(img, xi, yi);
                     sumB += pix->B;
@@ -315,8 +297,7 @@ void simple_paving(image * img, int factor) {
             avgR = sumR/div;
             avgG = sumG/div;
 
-            // set average color on output image
-            for (yi=y; yi < stepl; yi++) {
+            for (yi=y; yi < stepl; yi++) {                  // set average color of each bloc on output image
                 for (xi=x; xi < stepc; xi++) {
                     pix = Get_Pixel(img, xi, yi);
                     pix->B = avgB;
@@ -336,20 +317,24 @@ void simple_paving(image * img, int factor) {
 
 
 /****************************************************************************************
- * Redimensionnement d'image (entier, donc le facteur DOIT etre un diviseur de la taille max)
- *      img   : structure image
- *      factor: facteur d'echelle de redimensionnement
+ * Image resizing (smaller), needed to create the mosaic pieces.
+ * This function has been implemented in integer type, meaning the 'factor' parameter
+ * MUST match with the image size, ex:
+ * if size = 500, factor = 10: 500/10=50        => OK
+ * if size = 500, factor = 15: 500/15=33,333... => NOT OK
+ *      img   : image struct
+ *      factor: resize scale factor
 ****************************************************************************************/
 void resize_img(image * img, int factor) {
 
-    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
-    int div = factor*factor, bufsize;
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl=factor, stepc=factor, bufsize;
+    int div = factor*factor;
     pixel *pix;
 
     for (y=0; y<img->header.hauteur; y+=factor) {
         for(x=0; x<img->header.largeur; x+=factor) {
 
-            for (yi=y; yi < stepl; yi++) {
+            for (yi=y; yi < stepl; yi++) {                      // get average color of a bloc of size factor*factor
                 for (xi=x; xi < stepc; xi++) {
                     pix = Get_Pixel(img, xi, yi);
                     sumB += pix->B;
@@ -361,9 +346,8 @@ void resize_img(image * img, int factor) {
             avgR = sumR/div;
             avgG = sumG/div;
 
-            // set average color on a block of size
-            for (yi=y/factor; yi < stepl/factor; yi++) {
-                for (xi=x/factor; xi < stepc/factor; xi++) {
+            for (yi=y/factor; yi < stepl/factor; yi++) {        // creating smaller image of average color
+                for (xi=x/factor; xi < stepc/factor; xi++) {    // of corresponding bloc
                     pix = Get_Pixel(img, xi, yi);
                     pix->B = avgB;
                     pix->G = avgG;
@@ -377,8 +361,7 @@ void resize_img(image * img, int factor) {
         stepl += factor;
         stepc = factor;
     }
-    // update image header
-    img->header.hauteur = img->header.hauteur/factor;
+    img->header.hauteur = img->header.hauteur/factor;           // update smaller image header
     img->header.largeur = img->header.largeur/factor;
     bufsize = (3 * img->header.largeur + img->header.largeur%4) * img->header.hauteur;
     img->header.taille = img->header.offset + bufsize;
@@ -386,22 +369,31 @@ void resize_img(image * img, int factor) {
 
 
 
-/****************************************************************************************
- * Effet miroir de l'image + rotation de 90° degrees
- *      img   : structure image
- *      factor: taille des paves (haut. et larg.)
-****************************************************************************************/
-void mirror_rot90(image * img, image * rsz, int factor) {
 
-    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
-    int yr, xr;
-    int div = factor*factor;
+/****************************************************************************************
+ * Mosaic of resized images composing a bigger image
+ * This function has been implemented in integer type, meaning the 'factor' parameter
+ * MUST match with the image size, ex:
+ * if size = 500, factor = 10: 500/10=50        => OK
+ * if size = 500, factor = 15: 500/15=33,333... => NOT OK
+ *      img   : image struct
+ *      rs_img: image of each mosaic piece (MUST match with main image)
+ *      factor: size of mosaic piece
+****************************************************************************************/
+void mosaic(image * img, char * rs_img, int factor) {
+
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl=factor, stepc=factor, yr, xr, div=factor*factor;
+    int fact_rsz = img->header.largeur/factor;
     pixel *pix;
+    image *rsz = NULL;
+
+    rsz = Lire_Image(rs_img, "");
+    resize_img(rsz, fact_rsz);
 
     for (y=0; y<img->header.hauteur; y+=factor) {
         for(x=0; x<img->header.largeur; x+=factor) {
 
-            for (yi=y; yi < stepl; yi++) {
+            for (yi=y; yi < stepl; yi++) {                      // get average color of a bloc of size factor*factor
                 for (xi=x; xi < stepc; xi++) {
                     pix = Get_Pixel(img, xi, yi);
                     sumB += pix->B;
@@ -413,62 +405,14 @@ void mirror_rot90(image * img, image * rsz, int factor) {
             avgR = sumR/div;
             avgG = sumG/div;
 
-            // set average color on output image
-            for (yi=y; yi < stepl; yi++) {
-                for (xi=x; xi < stepc; xi++) {
-                    pix = Get_Pixel(rsz, yi, xi);
-                    //pix->B = avgB;
-                    //pix->G = avgG;
-                    //pix->R = avgR;
-                    Set_Pixel(img, xi, yi, pix);
-                }
-            }
-            sumG = 0; sumR = 0; sumB = 0;
-            stepc += factor;
-        }
-        stepl += factor;
-        stepc = factor;
-    }
-    Free_Image(rsz);
-}
-
-
-
-/****************************************************************************************
- * mosaique d'images retrecies composant une image de grande taille
- *      img   : structure image
- *      factor: taille des paves (haut. et larg.)
-****************************************************************************************/
-void mosaic(image * img, image * rsz, int factor) {
-
-    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
-    int yr, xr;
-    int div = factor*factor;
-    pixel *pix;
-
-    for (y=0; y<img->header.hauteur; y+=factor) {
-        for(x=0; x<img->header.largeur; x+=factor) {
-
-            // get average color of a bloc of size factor*factor
-            for (yi=y; yi < stepl; yi++) {
-                for (xi=x; xi < stepc; xi++) {
-                    pix = Get_Pixel(img, xi, yi);
-                    sumB += pix->B;
-                    sumR += pix->R;
-                    sumG += pix->G;
-                }
-            }
-            avgB = sumB/div;
-            avgR = sumR/div;
-            avgG = sumG/div;
-
-            // set average color on output image
             for (yi=y, yr=yi%rsz->header.hauteur; yi < stepl; yi++, yr++) {
                 for (xi=x, xr=xi%rsz->header.largeur; xi < stepc; xi++, xr++) {
-                    pix = Get_Pixel(rsz, xr, yr);
-                    //pix->B = avgB;
-                    //pix->G = avgG;
-                    //pix->R = avgR;
+                    pix = Get_Pixel(rsz, xr, yr);               // insert resized image in loop
+                    Set_Pixel(img, xi, yi, pix);
+                    pix = Get_Pixel(img, xi, yi);               // get color of every pixel of the resized image
+                    pix->B = (pix->B + avgB) / 2;               // calculate average color between resized image pixels
+                    pix->G = (pix->G + avgG) / 2;               // and the average of the blocs we've calculated earlier
+                    pix->R = (pix->R + avgR) / 2;
                     Set_Pixel(img, xi, yi, pix);
                 }
             }
