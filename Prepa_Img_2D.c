@@ -34,9 +34,13 @@ void test_paving(void) {
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
     img = Lire_Image("hendrix", "");
-    //Afficher_Header(img);
+    Afficher_Header(img);
     rsz = Lire_Image("hendrix", "");
+
     resize_img(rsz, 10);
+    Afficher_Header(rsz);
+    //Ecrire_Image(rsz, "_rsz1");
+
     mosaic(img, rsz, 10);
     Ecrire_Image(img, "_mos1");
 
@@ -339,7 +343,7 @@ void simple_paving(image * img, int factor) {
 void resize_img(image * img, int factor) {
 
     int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
-    int div = factor*factor;
+    int div = factor*factor, bufsize;
     pixel *pix;
 
     for (y=0; y<img->header.hauteur; y+=factor) {
@@ -376,18 +380,21 @@ void resize_img(image * img, int factor) {
     // update image header
     img->header.hauteur = img->header.hauteur/factor;
     img->header.largeur = img->header.largeur/factor;
+    bufsize = (3 * img->header.largeur + img->header.largeur%4) * img->header.hauteur;
+    img->header.taille = img->header.offset + bufsize;
 }
 
 
 
 /****************************************************************************************
- * mosaique d'images retrecies composant une image de grande taille
+ * Effet miroir de l'image + rotation de 90° degrees
  *      img   : structure image
  *      factor: taille des paves (haut. et larg.)
 ****************************************************************************************/
-void mosaic(image * img, image * rsz, int factor) {
+void mirror_rot90(image * img, image * rsz, int factor) {
 
     int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
+    int yr, xr;
     int div = factor*factor;
     pixel *pix;
 
@@ -409,7 +416,56 @@ void mosaic(image * img, image * rsz, int factor) {
             // set average color on output image
             for (yi=y; yi < stepl; yi++) {
                 for (xi=x; xi < stepc; xi++) {
-                    pix = Get_Pixel(rsz, xi, yi);
+                    pix = Get_Pixel(rsz, yi, xi);
+                    //pix->B = avgB;
+                    //pix->G = avgG;
+                    //pix->R = avgR;
+                    Set_Pixel(img, xi, yi, pix);
+                }
+            }
+            sumG = 0; sumR = 0; sumB = 0;
+            stepc += factor;
+        }
+        stepl += factor;
+        stepc = factor;
+    }
+    Free_Image(rsz);
+}
+
+
+
+/****************************************************************************************
+ * mosaique d'images retrecies composant une image de grande taille
+ *      img   : structure image
+ *      factor: taille des paves (haut. et larg.)
+****************************************************************************************/
+void mosaic(image * img, image * rsz, int factor) {
+
+    int x, y, xi, yi, sumR=0, sumG=0, sumB=0, avgR, avgG, avgB, stepl = factor, stepc = factor;
+    int yr, xr;
+    int div = factor*factor;
+    pixel *pix;
+
+    for (y=0; y<img->header.hauteur; y+=factor) {
+        for(x=0; x<img->header.largeur; x+=factor) {
+
+            // get average color of a bloc of size factor*factor
+            for (yi=y; yi < stepl; yi++) {
+                for (xi=x; xi < stepc; xi++) {
+                    pix = Get_Pixel(img, xi, yi);
+                    sumB += pix->B;
+                    sumR += pix->R;
+                    sumG += pix->G;
+                }
+            }
+            avgB = sumB/div;
+            avgR = sumR/div;
+            avgG = sumG/div;
+
+            // set average color on output image
+            for (yi=y, yr=yi%rsz->header.hauteur; yi < stepl; yi++, yr++) {
+                for (xi=x, xr=xi%rsz->header.largeur; xi < stepc; xi++, xr++) {
+                    pix = Get_Pixel(rsz, xr, yr);
                     //pix->B = avgB;
                     //pix->G = avgG;
                     //pix->R = avgR;

@@ -17,6 +17,7 @@ image * resize_init(image * img, int factor);
 void simple_paving(image * img, int factor);
 void resize_img(image * img, int factor);
 void mosaic(image * img, image * rsz, int factor);
+void mirror_rot90(image * img, image * rsz, int factor);
 
 void Tst_System_01(void);
 void Tst_System_02(void);
