@@ -33,28 +33,30 @@ void test_func(void) {
 
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
-    //img = Lire_Image("beethoven", "");
-    //Afficher_Header(img);
+    /// polar conversion test
+    img = Lire_Image("landscape", "");
+    Afficher_Header(img);
+
 
     /// mosaic test
-    img = Lire_Image("hendrix", "");
-    mosaic(img, "hendrix", 5);                  // big hendrix - little hendrix
-    Ecrire_Image(img, "_mos1");
-    img = Lire_Image("hendrix", "");
-    mosaic(img, "beethoven", 10);               // big hendrix - little beethoven
-    Ecrire_Image(img, "_mos2");
-    img = Lire_Image("hendrix", "");
-    mosaic(img, "hendrix", 20);                 // big hendrix - little hendrix
-    Ecrire_Image(img, "_mos3");
-    img = Lire_Image("beethoven", "");
-    mosaic(img, "beethoven", 10);               // big beethoven - little beethoven
-    Ecrire_Image(img, "_mos4");
-    img = Lire_Image("beethoven", "");
-    mosaic(img, "hendrix", 25);                 // big beethoven - little hendrix
-    Ecrire_Image(img, "_mos5");
-    img = Lire_Image("beethoven", "");
-    mosaic(img, "beethoven", 50);               // big beethoven - little beethoven
-    Ecrire_Image(img, "_mos6");                      // OK
+//    img = Lire_Image("hendrix", "");
+//    mosaic(img, "hendrix", 5);                  // big hendrix - little hendrix
+//    Ecrire_Image(img, "_mos1");
+//    img = Lire_Image("hendrix", "");
+//    mosaic(img, "beethoven", 10);               // big hendrix - little beethoven
+//    Ecrire_Image(img, "_mos2");
+//    img = Lire_Image("hendrix", "");
+//    mosaic(img, "hendrix", 20);                 // big hendrix - little hendrix
+//    Ecrire_Image(img, "_mos3");
+//    img = Lire_Image("beethoven", "");
+//    mosaic(img, "beethoven", 10);               // big beethoven - little beethoven
+//    Ecrire_Image(img, "_mos4");
+//    img = Lire_Image("beethoven", "");
+//    mosaic(img, "hendrix", 25);                 // big beethoven - little hendrix
+//    Ecrire_Image(img, "_mos5");
+//    img = Lire_Image("beethoven", "");
+//    mosaic(img, "beethoven", 50);               // big beethoven - little beethoven
+//    Ecrire_Image(img, "_mos6");                      // OK
 
     /// resize test
 //    resize_img(img, 100);
@@ -70,7 +72,7 @@ void test_func(void) {
 //    Ecrire_Image(img, "_rsz4");
 //    img = Lire_Image("hendrix", "");
 //    resize_img(img, 5);
-//    Ecrire_Image(img, "_rsz5");                   // OK
+//    Ecrire_Image(img, "_rsz5");                           // OK
 
     /// paving test
 //    simple_paving(img, 5);
@@ -83,7 +85,7 @@ void test_func(void) {
 //    Ecrire_Image(img, "_pav3");
 //    img = Lire_Image("hendrix", "");
 //    simple_paving(img, 50);
-//    Ecrire_Image(img, "_pav4");                   // OK
+//    Ecrire_Image(img, "_pav4");                           // OK
 
     Free_Image(img);
 
@@ -423,4 +425,43 @@ void mosaic(image * img, char * rs_img, int factor) {
         stepc = factor;
     }
     Free_Image(rsz);
+}
+
+
+
+
+/****************************************************************************************
+ * Convert cartesian coordinates of an image to polar coordinates
+ *      in    : image source, Input
+ *      out   : image destination, Output
+ *      angle : angle
+ *      radius: radius of the central circle
+****************************************************************************************/
+void polarize(image * in, image * out, uint angle, uint radius) {
+
+    double x, y, xc=out->header.largeur/2, yc=out->header.hauteur/2;
+    double d, t, xcart, ycart;
+    pixel *pix = NULL;
+
+    for (x=0; x<out->header.hauteur; x++) {
+        for (y=0; y<out->header.hauteur; y++) {
+            ycart = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc)) - radius;
+            d = ycart + radius;
+            if (d < (in->header.hauteur) + radius && d > radius) {
+                t = atan2(xc - x, yc - y) / (3.0/4.0*M_PI);
+//                theta = (atan2(y - yc, x - xc)) / M_PI;
+//                theta = (atan2(x - xc, y - yc)) / M_PI;
+//                theta = (atan2(yc - y, xc - x)) / M_PI;
+                xcart = (1.0 + t) * ((double) (in->header.largeur-1) / 2.0);
+                if ((int) xcart >= 0 && (int) ycart >= 0 && (int) xcart < in->header.largeur && (int) ycart < in->header.hauteur) {
+                    pix = Get_Pixel(in, (int)xcart, (int)ycart);
+                    if (pix)
+                        Set_Pixel(out, x, y, pix);
+                }
+
+
+            }
+        }
+    }
+
 }

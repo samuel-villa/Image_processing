@@ -8,6 +8,7 @@
 #ifndef IMAGE_PROCESSING_PREPA_IMG_2D_H
 #define IMAGE_PROCESSING_PREPA_IMG_2D_H
 
+#include <math.h>
 #include "Img_Bmp_2D.h"
 
 void Filtrer_Noir_Blanc(image * img);
