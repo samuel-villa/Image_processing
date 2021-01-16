@@ -29,13 +29,19 @@ int main(void) {
 ****************************************************************************************/
 void test_func(void) {
 
-    image *img = NULL;
-
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
+
+    image *img = NULL, *out = NULL;
+    int radius = 0;
 
     /// polar conversion test
     img = Lire_Image("landscape", "");
-    Afficher_Header(img);
+    out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    polarize(img, out, 360, radius, N);
+    Ecrire_Image(out, "_pol1");
+
+    //Afficher_Header(img);
+    //Afficher_Header(out);
 
 
     /// mosaic test
@@ -88,6 +94,7 @@ void test_func(void) {
 //    Ecrire_Image(img, "_pav4");                           // OK
 
     Free_Image(img);
+    Free_Image(out);
 
 }
 
@@ -434,13 +441,14 @@ void mosaic(image * img, char * rs_img, int factor) {
  * Convert cartesian coordinates of an image to polar coordinates
  *      in    : image source, Input
  *      out   : image destination, Output
- *      angle : angle
+ *      angle : image angle, ex: 360 = donut, 180 = half donut, 90 = 1/4 donut, 0 = empty image
  *      radius: radius of the central circle
+ *      start : where the 'cut' will be directed, can be N, S, W or E.
 ****************************************************************************************/
-void polarize(image * in, image * out, uint angle, uint radius) {
+void polarize(image * in, image * out, double angle, uint radius, int start) {
 
-    double x, y, xc=out->header.largeur/2, yc=out->header.hauteur/2;
-    double d, t, xcart, ycart;
+    double x, y, d, t, xcart, ycart, xc=out->header.largeur/2, yc=out->header.hauteur/2;
+    double alpha = angle / 360;
     pixel *pix = NULL;
 
     for (x=0; x<out->header.hauteur; x++) {
@@ -448,20 +456,19 @@ void polarize(image * in, image * out, uint angle, uint radius) {
             ycart = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc)) - radius;
             d = ycart + radius;
             if (d < (in->header.hauteur) + radius && d > radius) {
-                t = atan2(xc - x, yc - y) / (3.0/4.0*M_PI);
-//                theta = (atan2(y - yc, x - xc)) / M_PI;
-//                theta = (atan2(x - xc, y - yc)) / M_PI;
-//                theta = (atan2(yc - y, xc - x)) / M_PI;
+
+                if (start == N)       t = atan2(xc - x, yc - y) / (alpha*M_PI);
+                else if (start == S)  t = atan2(x - xc, y - yc) / (alpha*M_PI);
+                else if (start == W)  t = atan2(y - yc, x - xc) / (alpha*M_PI);
+                else if (start == E)  t = atan2(yc - y, xc - x) / (alpha*M_PI);
+
                 xcart = (1.0 + t) * ((double) (in->header.largeur-1) / 2.0);
                 if ((int) xcart >= 0 && (int) ycart >= 0 && (int) xcart < in->header.largeur && (int) ycart < in->header.hauteur) {
                     pix = Get_Pixel(in, (int)xcart, (int)ycart);
                     if (pix)
                         Set_Pixel(out, x, y, pix);
                 }
-
-
             }
         }
     }
-
 }

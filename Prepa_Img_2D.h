@@ -11,11 +11,16 @@
 #include <math.h>
 #include "Img_Bmp_2D.h"
 
+enum Card_Points {
+    N, S, W, E
+};
+
 void Filtrer_Noir_Blanc(image * img);
 void Damier(image * img);
 void simple_paving(image * img, int factor);
 void resize_img(image * img, int factor);
 void mosaic(image * img, char * rs_img, int factor);
+void polarize(image * in, image * out, double angle, uint radius, int start);
 
 void Tst_System_01(void);
 void Tst_System_02(void);
