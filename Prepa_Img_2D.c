@@ -46,23 +46,23 @@ void test_func(void) {
 
     /// mosaic test
 //    img = Lire_Image("hendrix", "");
-//    mosaic(img, "hendrix", 5);                  // big hendrix - little hendrix
+//    mosaic(img, "hendrix", 5);                            // big hendrix - little hendrix
 //    Ecrire_Image(img, "_mos1");
 //    img = Lire_Image("hendrix", "");
-//    mosaic(img, "beethoven", 10);               // big hendrix - little beethoven
+//    mosaic(img, "beethoven", 10);                         // big hendrix - little beethoven
 //    Ecrire_Image(img, "_mos2");
 //    img = Lire_Image("hendrix", "");
-//    mosaic(img, "hendrix", 20);                 // big hendrix - little hendrix
+//    mosaic(img, "hendrix", 20);                           // big hendrix - little hendrix
 //    Ecrire_Image(img, "_mos3");
 //    img = Lire_Image("beethoven", "");
-//    mosaic(img, "beethoven", 10);               // big beethoven - little beethoven
+//    mosaic(img, "beethoven", 10);                         // big beethoven - little beethoven
 //    Ecrire_Image(img, "_mos4");
 //    img = Lire_Image("beethoven", "");
-//    mosaic(img, "hendrix", 25);                 // big beethoven - little hendrix
+//    mosaic(img, "hendrix", 25);                           // big beethoven - little hendrix
 //    Ecrire_Image(img, "_mos5");
 //    img = Lire_Image("beethoven", "");
-//    mosaic(img, "beethoven", 50);               // big beethoven - little beethoven
-//    Ecrire_Image(img, "_mos6");                      // OK
+//    mosaic(img, "beethoven", 50);                         // big beethoven - little beethoven
+//    Ecrire_Image(img, "_mos6");                           // OK
 
     /// resize test
 //    resize_img(img, 100);
@@ -441,14 +441,13 @@ void mosaic(image * img, char * rs_img, int factor) {
  * Convert cartesian coordinates of an image to polar coordinates
  *      in    : image source, Input
  *      out   : image destination, Output
- *      angle : image angle, ex: 360 = donut, 180 = half donut, 90 = 1/4 donut, 0 = empty image
+ *      angle : image angle, ex: 360=donut, 180=half donut, 90=1/4 donut, 0=empty image, -180=reversed half donut
  *      radius: radius of the central circle
  *      start : where the 'cut' will be directed, can be N, S, W or E.
 ****************************************************************************************/
 void polarize(image * in, image * out, double angle, uint radius, int start) {
 
-    double x, y, d, t, xcart, ycart, xc=out->header.largeur/2, yc=out->header.hauteur/2;
-    double alpha = angle / 360;
+    double x, y, d, t, xcart, ycart, xc=out->header.largeur/2, yc=out->header.hauteur/2, alpha=angle/360;
     pixel *pix = NULL;
 
     for (x=0; x<out->header.hauteur; x++) {
@@ -457,10 +456,12 @@ void polarize(image * in, image * out, double angle, uint radius, int start) {
             d = ycart + radius;
             if (d < (in->header.hauteur) + radius && d > radius) {
 
-                if (start == N)       t = atan2(xc - x, yc - y) / (alpha*M_PI);
+                if      (start == N)  t = atan2(xc - x, yc - y) / (alpha*M_PI);
                 else if (start == S)  t = atan2(x - xc, y - yc) / (alpha*M_PI);
                 else if (start == W)  t = atan2(y - yc, x - xc) / (alpha*M_PI);
                 else if (start == E)  t = atan2(yc - y, xc - x) / (alpha*M_PI);
+
+                else if (start == 4)  t = atan2(yc - xc, x - y) / (alpha*M_PI);
 
                 xcart = (1.0 + t) * ((double) (in->header.largeur-1) / 2.0);
                 if ((int) xcart >= 0 && (int) ycart >= 0 && (int) xcart < in->header.largeur && (int) ycart < in->header.hauteur) {
