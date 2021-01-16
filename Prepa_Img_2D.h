@@ -20,7 +20,9 @@ void Damier(image * img);
 void simple_paving(image * img, int factor);
 void resize_img(image * img, int factor);
 void mosaic(image * img, char * rs_img, int factor);
-void polarize(image * in, image * out, double angle, uint radius, int start);
+//void polarize(image * in, image * out, double angle, uint radius, int cut_dir);
+image * polarize(image * in, char * in_name, double angle, uint radius, int cut_dir);
+image * set_background(image * img, char * img_name, int radius);
 
 void Tst_System_01(void);
 void Tst_System_02(void);

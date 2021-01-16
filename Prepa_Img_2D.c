@@ -32,13 +32,35 @@ void test_func(void) {
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
     image *img = NULL, *out = NULL;
-    int radius = 0;
+    int radius = 50;
+    char *fname = "beethoven";
 
     /// polar conversion test
-    img = Lire_Image("landscape", "");
-    out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    polarize(img, out, 360, radius, N);
+    img = Lire_Image(fname, "");
+    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    out = polarize(img, fname, 90, radius, N);
     Ecrire_Image(out, "_pol1");
+
+    img = Lire_Image(fname, "");
+    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    out = polarize(img, fname, 180, radius, N);
+    Ecrire_Image(out, "_pol2");
+
+    img = Lire_Image(fname, "");
+    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    out = polarize(img, fname, 270, radius, N);
+    Ecrire_Image(out, "_pol3");
+
+    img = Lire_Image(fname, "");
+    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    out = polarize(img, fname, 360, radius, N);
+    Ecrire_Image(out, "_pol4");
+
+    img = Lire_Image(fname, "");
+    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+    out = polarize(img, fname, 360, radius, N);
+    Ecrire_Image(out, "_pol5");
+
 
     //Afficher_Header(img);
     //Afficher_Header(out);
@@ -80,7 +102,7 @@ void test_func(void) {
 //    resize_img(img, 5);
 //    Ecrire_Image(img, "_rsz5");                           // OK
 
-    /// paving test
+    /// constant paving test
 //    simple_paving(img, 5);
 //    Ecrire_Image(img, "_pav1");
 //    img = Lire_Image("hendrix", "");
@@ -439,37 +461,75 @@ void mosaic(image * img, char * rs_img, int factor) {
 
 /****************************************************************************************
  * Convert cartesian coordinates of an image to polar coordinates
- *      in    : image source, Input
- *      out   : image destination, Output
- *      angle : image angle, ex: 360=donut, 180=half donut, 90=1/4 donut, 0=empty image, -180=reversed half donut
- *      radius: radius of the central circle
- *      start : where the 'cut' will be directed, can be N, S, W or E.
+ *      in     : image source, Input
+ *      in_name: image source file name
+ *      angle  : image angle, ex: 360=donut, 180=half donut, 90=1/4 donut, 0=empty image, -180=reversed half donut
+ *      radius : radius of the central circle
+ *      cut_dir: where the 'cut' will be directed, can be N, S, W or E.
 ****************************************************************************************/
-void polarize(image * in, image * out, double angle, uint radius, int start) {
+image * polarize(image * in, char * in_name, double angle, uint radius, int cut_dir) {
 
+    image *out = set_background(in, in_name, radius);
     double x, y, d, t, xcart, ycart, xc=out->header.largeur/2, yc=out->header.hauteur/2, alpha=angle/360;
     pixel *pix = NULL;
 
-    for (x=0; x<out->header.hauteur; x++) {
-        for (y=0; y<out->header.hauteur; y++) {
+    for (y=0; y<out->header.largeur; y++) {
+        for (x=0; x<out->header.hauteur; x++) {
             ycart = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc)) - radius;
             d = ycart + radius;
             if (d < (in->header.hauteur) + radius && d > radius) {
 
-                if      (start == N)  t = atan2(xc - x, yc - y) / (alpha*M_PI);
-                else if (start == S)  t = atan2(x - xc, y - yc) / (alpha*M_PI);
-                else if (start == W)  t = atan2(y - yc, x - xc) / (alpha*M_PI);
-                else if (start == E)  t = atan2(yc - y, xc - x) / (alpha*M_PI);
+                if      (cut_dir == N) t = atan2(xc - x, yc - y) / (alpha * M_PI);
+                else if (cut_dir == S) t = atan2(x - xc, y - yc) / (alpha * M_PI);
+                else if (cut_dir == W) t = atan2(y - yc, x - xc) / (alpha * M_PI);
+                else if (cut_dir == E) t = atan2(yc - y, xc - x) / (alpha * M_PI);
 
-                else if (start == 4)  t = atan2(yc - xc, x - y) / (alpha*M_PI);
-
-                xcart = (1.0 + t) * ((double) (in->header.largeur-1) / 2.0);
-                if ((int) xcart >= 0 && (int) ycart >= 0 && (int) xcart < in->header.largeur && (int) ycart < in->header.hauteur) {
-                    pix = Get_Pixel(in, (int)xcart, (int)ycart);
+                xcart = (1.0 + t) * ((in->header.largeur-1) / 2.0);
+                if (xcart >= 0 && ycart >= 0 && xcart < in->header.largeur && ycart < in->header.hauteur) {
+                    pix = Get_Pixel(in, xcart, ycart);
                     if (pix)
                         Set_Pixel(out, x, y, pix);
                 }
             }
         }
     }
+    return out;
+}
+
+
+
+
+/****************************************************************************************
+ * Prepare background for the image converted to polar coordinates,
+ * allocate the correct size and set the average color of the source image as background.
+ *      img     : image struct
+ *      img_name: image source file name
+ *      radius  : radius of the central circle
+****************************************************************************************/
+image * set_background(image * img, char * img_name, int radius) {
+
+    int x, y, sumR=0, sumG=0, sumB=0;
+    image * out = NULL;
+    pixel *pix = NULL;
+
+    for (y=0; y<img->header.hauteur; y++) {                     // get color of each pixel
+        for(x=0; x<img->header.largeur; x++) {
+            pix = Get_Pixel(img, x, y);
+            sumB += pix->B;
+            sumR += pix->R;
+            sumG += pix->G;
+        }
+    }
+    pix->R = sumR/(img->header.hauteur*img->header.largeur);    // get average color
+    pix->G = sumG/(img->header.hauteur*img->header.largeur);
+    pix->B = sumB/(img->header.hauteur*img->header.largeur);
+                                                                // create background and allocate memory
+    out = Creer_Image(img_name, ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
+
+    for (y=0; y<out->header.hauteur; y++) {                     // set average color (WHITE will be overwritten)
+        for(x=0; x<out->header.largeur; x++) {
+            Set_Pixel(out, x, y, pix);
+        }
+    }
+    return out;
 }
