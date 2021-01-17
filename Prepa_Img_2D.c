@@ -34,25 +34,25 @@ void test_func(void) {
     out = polarize(img, "landscape", 360, 0, N);
     Ecrire_Image(out, "_pol1");
 
-    img = Lire_Image("landscape", "");
-    out = polarize(img, "landscape", 360, 950, N);
-    Ecrire_Image(out, "_pol2");
-
-    img = Lire_Image("landscape", "");
-    out = polarize(img, "landscape", 270, 100, S);
-    Ecrire_Image(out, "_pol3");
-
-    img = Lire_Image("hendrix", "");
-    out = polarize(img, "hendrix", 90, 150, E);
-    Ecrire_Image(out, "_pol4");
-
-    img = Lire_Image("beethoven", "");
-    out = polarize(img, "beethoven", -45, 200, S);
-    Ecrire_Image(out, "_pol5");
-
-    img = Lire_Image("Test", "");
-    out = polarize(img, "Test", 120, 250, E);
-    Ecrire_Image(out, "_pol5");                     // OK
+//    img = Lire_Image("landscape", "");
+//    out = polarize(img, "landscape", 360, 950, N);
+//    Ecrire_Image(out, "_pol2");
+//
+//    img = Lire_Image("landscape", "");
+//    out = polarize(img, "landscape", 270, 100, S);
+//    Ecrire_Image(out, "_pol3");
+//
+//    img = Lire_Image("hendrix", "");
+//    out = polarize(img, "hendrix", 90, 150, E);
+//    Ecrire_Image(out, "_pol4");
+//
+//    img = Lire_Image("beethoven", "");
+//    out = polarize(img, "beethoven", -45, 200, S);
+//    Ecrire_Image(out, "_pol5");
+//
+//    img = Lire_Image("Test", "");
+//    out = polarize(img, "Test", 120, 250, E);
+//    Ecrire_Image(out, "_pol5");                     // OK
 
     //Afficher_Header(img);
     //Afficher_Header(out);
@@ -473,10 +473,10 @@ image * polarize(image * in, char * in_name, double angle, uint radius, int cut_
             d = ydist + radius;
             if (d < in->header.hauteur + radius && d > radius) {
 
-                if      (cut_dir == N) t = atan2(xc - x, yc - y) / (alpha * M_PI);      // angle
-                else if (cut_dir == S) t = atan2(x - xc, y - yc) / (alpha * M_PI);
-                else if (cut_dir == W) t = atan2(y - yc, x - xc) / (alpha * M_PI);
-                else if (cut_dir == E) t = atan2(yc - y, xc - x) / (alpha * M_PI);
+                if      (cut_dir == S) t = atan2(xc - x, yc - y) / (alpha * M_PI);      // angle and image orientation
+                else if (cut_dir == N) t = atan2(x - xc, y - yc) / (alpha * M_PI);
+                else if (cut_dir == E) t = atan2(y - yc, x - xc) / (alpha * M_PI);
+                else if (cut_dir == W) t = atan2(yc - y, xc - x) / (alpha * M_PI);
 
                 xdist = (t + 1) * ((in->header.largeur - 1) / 2);
                 if (xdist >= 0 && ydist >= 0 && xdist < in->header.largeur && ydist < in->header.hauteur) {
