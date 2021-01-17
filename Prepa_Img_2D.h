@@ -3,7 +3,7 @@
 *
 * Test
 *
-* Programmation procedurale 2021 - Samuel CIULLA - Version 0
+* Programmation procedurale 2021 - Samuel CIULLA - Version 2
 ****************************************************************************************/
 #ifndef IMAGE_PROCESSING_PREPA_IMG_2D_H
 #define IMAGE_PROCESSING_PREPA_IMG_2D_H

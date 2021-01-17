@@ -3,7 +3,7 @@
 *
 * Testing system functions
 *
-* Programmation procedurale 2021 - Samuel CIULLA - Version 0
+* Programmation procedurale 2021 - Samuel CIULLA - Version 2
 ****************************************************************************************/
 #include "Prepa_Img_2D.h"
 
@@ -15,10 +15,6 @@ int main(void) {
     printf("\nSamuel CIULLA");
     printf("\nTest image bitmap: matrice 2D\n\n");
 
- //   Tst_System_01();                // copy + copy_bw + monochromes + damier
- //   Tst_System_02();                // monochromes handling size
- //   Tst_System_03();                // monochromes + damiers handling size
-//    Tst_System_04();                // copy ?
     test_func();
 
     return 0;
@@ -32,39 +28,34 @@ void test_func(void) {
     printf("\n--- Test Sam -----------------------------------------------------\n\n");
 
     image *img = NULL, *out = NULL;
-    int radius = 50;
-    char *fname = "beethoven";
 
     /// polar conversion test
-    img = Lire_Image(fname, "");
-    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    out = polarize(img, fname, 90, radius, N);
+    img = Lire_Image("landscape", "");
+    out = polarize(img, "landscape", 360, 0, N);
     Ecrire_Image(out, "_pol1");
 
-    img = Lire_Image(fname, "");
-    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    out = polarize(img, fname, 180, radius, N);
+    img = Lire_Image("landscape", "");
+    out = polarize(img, "landscape", 360, 950, N);
     Ecrire_Image(out, "_pol2");
 
-    img = Lire_Image(fname, "");
-    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    out = polarize(img, fname, 270, radius, N);
+    img = Lire_Image("landscape", "");
+    out = polarize(img, "landscape", 270, 100, S);
     Ecrire_Image(out, "_pol3");
 
-    img = Lire_Image(fname, "");
-    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    out = polarize(img, fname, 360, radius, N);
+    img = Lire_Image("hendrix", "");
+    out = polarize(img, "hendrix", 90, 150, E);
     Ecrire_Image(out, "_pol4");
 
-    img = Lire_Image(fname, "");
-    //out = Creer_Image("landscape", ((img->header.hauteur+radius) *2), ((img->header.hauteur+radius) *2), BLANC);
-    out = polarize(img, fname, 360, radius, N);
+    img = Lire_Image("beethoven", "");
+    out = polarize(img, "beethoven", -45, 200, S);
     Ecrire_Image(out, "_pol5");
 
+    img = Lire_Image("Test", "");
+    out = polarize(img, "Test", 120, 250, E);
+    Ecrire_Image(out, "_pol5");                     // OK
 
     //Afficher_Header(img);
     //Afficher_Header(out);
-
 
     /// mosaic test
 //    img = Lire_Image("hendrix", "");
@@ -80,7 +71,7 @@ void test_func(void) {
 //    mosaic(img, "beethoven", 10);                         // big beethoven - little beethoven
 //    Ecrire_Image(img, "_mos4");
 //    img = Lire_Image("beethoven", "");
-//    mosaic(img, "hendrix", 25);                           // big beethoven - little hendrix
+//    mosaic(img, "hendrix", 10);                           // big beethoven - little hendrix
 //    Ecrire_Image(img, "_mos5");
 //    img = Lire_Image("beethoven", "");
 //    mosaic(img, "beethoven", 50);                         // big beethoven - little beethoven
@@ -469,26 +460,28 @@ void mosaic(image * img, char * rs_img, int factor) {
 ****************************************************************************************/
 image * polarize(image * in, char * in_name, double angle, uint radius, int cut_dir) {
 
+    if (radius < 0) radius = 0;                                                 // set min and max radius level:
+    if (radius > in->header.hauteur*2.5) radius = in->header.hauteur*2.5;       // avoid errors and bad image resolution
+
     image *out = set_background(in, in_name, radius);
-    double x, y, d, t, xcart, ycart, xc=out->header.largeur/2, yc=out->header.hauteur/2, alpha=angle/360;
+    double x, y, d, t, xdist, ydist, xc=out->header.largeur/2, yc=out->header.hauteur/2, alpha=angle/360;
     pixel *pix = NULL;
 
     for (y=0; y<out->header.largeur; y++) {
         for (x=0; x<out->header.hauteur; x++) {
-            ycart = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc)) - radius;
-            d = ycart + radius;
-            if (d < (in->header.hauteur) + radius && d > radius) {
+            ydist = sqrt((x - xc) * (x - xc) + (y - yc) * (y - yc)) - radius;           // distance
+            d = ydist + radius;
+            if (d < in->header.hauteur + radius && d > radius) {
 
-                if      (cut_dir == N) t = atan2(xc - x, yc - y) / (alpha * M_PI);
+                if      (cut_dir == N) t = atan2(xc - x, yc - y) / (alpha * M_PI);      // angle
                 else if (cut_dir == S) t = atan2(x - xc, y - yc) / (alpha * M_PI);
                 else if (cut_dir == W) t = atan2(y - yc, x - xc) / (alpha * M_PI);
                 else if (cut_dir == E) t = atan2(yc - y, xc - x) / (alpha * M_PI);
 
-                xcart = (1.0 + t) * ((in->header.largeur-1) / 2.0);
-                if (xcart >= 0 && ycart >= 0 && xcart < in->header.largeur && ycart < in->header.hauteur) {
-                    pix = Get_Pixel(in, xcart, ycart);
-                    if (pix)
-                        Set_Pixel(out, x, y, pix);
+                xdist = (t + 1) * ((in->header.largeur - 1) / 2);
+                if (xdist >= 0 && ydist >= 0 && xdist < in->header.largeur && ydist < in->header.hauteur) {
+                    pix = Get_Pixel(in, xdist, ydist);
+                    Set_Pixel(out, x, y, pix);
                 }
             }
         }
