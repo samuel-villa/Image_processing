@@ -1,7 +1,7 @@
 /****************************************************************************************
 * .bmp 24 bits Image Generation
 *
-* Testing system functions
+* Test and image modelization functions
 *
 * Programmation procedurale 2021 - Samuel CIULLA - Version 2
 ****************************************************************************************/
@@ -21,7 +21,8 @@ int main(void) {
 }
 
 /****************************************************************************************
-* Test Sam
+ * Testing all filtering functions
+ *      goal: search for possible bugs and improve all functions
 ****************************************************************************************/
 void test_func(void) {
 
@@ -52,10 +53,9 @@ void test_func(void) {
 //
 //    img = Lire_Image("Test", "");
 //    out = polarize(img, "Test", 120, 250, E);
-//    Ecrire_Image(out, "_pol5");                     // OK
+//    Ecrire_Image(out, "_pol5");                           // OK
 
-    //Afficher_Header(img);
-    //Afficher_Header(out);
+//    Afficher_Header(img);
 
     /// mosaic test
 //    img = Lire_Image("hendrix", "");
@@ -106,10 +106,13 @@ void test_func(void) {
 //    simple_paving(img, 50);
 //    Ecrire_Image(img, "_pav4");                           // OK
 
+//    Afficher_Header(out);
+
     Free_Image(img);
     Free_Image(out);
-
 }
+
+
 
 /****************************************************************************************
 * Test 1 : Lire, modifier et ecrire une image moyenne
@@ -142,6 +145,8 @@ void Tst_System_01(void) {
     Free_Image(img);
 }
 
+
+
 /****************************************************************************************
 * Test 2 : Creation d'images vierges
 *
@@ -168,6 +173,8 @@ void Tst_System_02(void) {
     Ecrire_Image(img, "_012");
     Free_Image(img);
 }
+
+
 
 /****************************************************************************************
 * Test 3 : Creation de 4 images presque identiques, sauf en largeur
@@ -209,6 +216,8 @@ void Tst_System_03(void) {
     Free_Image(img);
 }
 
+
+
 /****************************************************************************************
 * Test 4 : Copie de 5 images presque identiques, sauf en largeur
 *
@@ -236,6 +245,8 @@ void Tst_System_04(void) {
     Free_Image(ori);
     return;
 }
+
+
 
 /****************************************************************************************
 * Filtrer l'image en noir et blanc
@@ -267,6 +278,8 @@ void Filtrer_Noir_Blanc(image * img) {
     printf(" termine.\n\n");
 }
 
+
+
 /****************************************************************************************
 * Genere une image en damier noir et blanc
 *   img     : structure image
@@ -289,13 +302,15 @@ void Damier(image * img) {
 
 
 
+
 /****************************************************************************************
- * Image paving
+ * Image constant paving, divide the image in pave pieces and color each pave
+ * with its corresponding average color.
  * This function has been implemented in integer type, meaning the 'factor' parameter
  * MUST match with the image size, ex:
  * if size = 500, factor = 10: 500/10=50        => OK
  * if size = 500, factor = 15: 500/15=33,333... => NOT OK
- *      img   : image struct
+ *      img   : image source struct
  *      factor: size of pave pieces
 ****************************************************************************************/
 void simple_paving(image * img, int factor) {
@@ -344,7 +359,7 @@ void simple_paving(image * img, int factor) {
  * MUST match with the image size, ex:
  * if size = 500, factor = 10: 500/10=50        => OK
  * if size = 500, factor = 15: 500/15=33,333... => NOT OK
- *      img   : image struct
+ *      img   : image source struct
  *      factor: resize scale factor
 ****************************************************************************************/
 void resize_img(image * img, int factor) {
@@ -398,8 +413,8 @@ void resize_img(image * img, int factor) {
  * MUST match with the image size, ex:
  * if size = 500, factor = 10: 500/10=50        => OK
  * if size = 500, factor = 15: 500/15=33,333... => NOT OK
- *      img   : image struct
- *      rs_img: image of each mosaic piece (MUST match with main image)
+ *      img   : image source struct
+ *      rs_img: image of each mosaic piece, if not the source image, it MUST have same dimension ratio
  *      factor: size of mosaic piece
 ****************************************************************************************/
 void mosaic(image * img, char * rs_img, int factor) {
@@ -452,11 +467,11 @@ void mosaic(image * img, char * rs_img, int factor) {
 
 /****************************************************************************************
  * Convert cartesian coordinates of an image to polar coordinates
- *      in     : image source, Input
+ *      in     : image source struct, Input
  *      in_name: image source file name
  *      angle  : image angle, ex: 360=donut, 180=half donut, 90=1/4 donut, 0=empty image, -180=reversed half donut
  *      radius : radius of the central circle
- *      cut_dir: where the 'cut' will be directed, can be N, S, W or E.
+ *      cut_dir: where the image will be oriented, can be N, S, W or E.
 ****************************************************************************************/
 image * polarize(image * in, char * in_name, double angle, uint radius, int cut_dir) {
 
@@ -495,7 +510,7 @@ image * polarize(image * in, char * in_name, double angle, uint radius, int cut_
 /****************************************************************************************
  * Prepare background for the image converted to polar coordinates,
  * allocate the correct size and set the average color of the source image as background.
- *      img     : image struct
+ *      img     : image source struct
  *      img_name: image source file name
  *      radius  : radius of the central circle
 ****************************************************************************************/
