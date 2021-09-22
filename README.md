@@ -20,4 +20,4 @@ The input image Cartesian coordinates are converted to Polar coordinates so the 
 ![Polarization](img/polarization.png)
 
 #### Comment
-For this assignment the files `Prepa_Img_2D.h` and `Prepa_Img_2D.c` have been provided by the teacher. The theoric explanations before this assignment were based upon these two files.
+For this assignment the files `Img_Bmp_2D.h` and `Img_Bmp_2D.c` have been provided by the teacher. The theoric explanations before this assignment were based upon these two files.
