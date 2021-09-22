@@ -1,4 +1,4 @@
-# Image_processing
+# Image Processing
 Bitmap 24 bits file manipulation in C
 
 School project aiming to create bitmap images processed and manipulated given an input image.
